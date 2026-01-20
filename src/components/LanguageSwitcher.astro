@@ -1,0 +1,36 @@
+---
+import { CONFIG, LANGUAGES } from '@lib/config';
+import { getLocale } from '@i18n/index';
+
+const { locale } = Astro.params;
+const lang = getLocale(locale);
+
+const languages = LANGUAGES as { [key: string]: string };
+const reg = new RegExp(`/${lang}`, 'i');
+
+const langUrls = CONFIG.locals.map((item) => {
+  const href = new URL(
+    (lang === 'en' && item !== 'en' ? item : '') +
+      Astro.url.pathname.replace(reg, item === 'en' ? '' : item),
+    Astro.url.origin
+  ).toString();
+
+  return {
+    href,
+    label: languages[item] || item,
+    isActive: item.toLowerCase() === lang.toLowerCase(),
+  };
+});
+---
+
+<div class="flex items-center gap-3 text-xs text-gray-600">
+  {langUrls.map((item) =>
+    item.isActive ? (
+      <span class="opacity-80 cursor-default">{item.label}</span>
+    ) : (
+      <a class="hover:text-blue-500 underline" href={item.href} title={item.label}>
+        {item.label}
+      </a>
+    )
+  )}
+</div>
